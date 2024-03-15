@@ -39,6 +39,7 @@ export const useTree = create<TreeState>((setter) => ({
       const updatedTree = state.tree.replace(
         regex,
         (match, startTag, content, endTag) => {
+          console.log(match)
           // Update content
           const updatedContent = newData ? newData : content;
 
@@ -52,20 +53,19 @@ export const useTree = create<TreeState>((setter) => ({
             //@ts-expect-error
             existingProps[propName] = propValue;
           }
-
-          // Merge existing and new props
           const mergedProps = { ...existingProps, ...newProps };
-          console.log(mergedProps);
           let updatedPropsStr = "";
+          console.log(mergedProps);
           for (const propName in mergedProps) {
             updatedPropsStr += ` ${propName}="${mergedProps[propName]}"`;
           }
+        
           return `<${removeProps(
             startTag
           )}${updatedPropsStr}>${updatedContent}${endTag}`;
         }
       );
-
+        
       return { tree: updatedTree };
     });
   },

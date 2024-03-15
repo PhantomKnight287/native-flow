@@ -1,18 +1,18 @@
-import {create} from "zustand"
-import {ElementTypes} from "@/types/rxjs-event";
-import {ElementProps} from "@/types/props";
+import { create } from "zustand";
+import { TreeNode } from "@/structs/tree";
 
-export interface ActiveElement{
-    type?:ElementTypes,
-    props:ElementProps,
-    id?:string,
-    setActiveElement:(type:ElementTypes,props:ElementProps,id:string)=>void,
-    clearActiveElement:()=>void
+export interface ActiveElement {
+  element?: TreeNode;
+  id?: string;
+  activeIndex?: string;
+  setActiveElement: (element: TreeNode, activeIndex: string) => void;
+  clearActiveElement: () => void;
 }
 
-
-export const useActiveElement = create<ActiveElement>((setter)=>({
-    props:{},
-    setActiveElement:(element,props,id)=>setter((state)=>({props,type:element,id})),
-    clearActiveElement:()=>setter({type:undefined,props:{},id:undefined})
-}))
+export const useActiveElement = create<ActiveElement>((setter) => ({
+  element: undefined,
+  activeIndex: undefined,
+  setActiveElement: (element, activeIndex) =>
+    setter((state) => ({ element, id: element.id, activeIndex })),
+  clearActiveElement: () => setter({ id: undefined, element: undefined }),
+}));

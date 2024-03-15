@@ -13,35 +13,21 @@ import {
 import { ButtonProps, buttonVariants } from "@/components/ui/button";
 import { VariantProps } from "class-variance-authority";
 import { useTree } from "@/state/tree";
+import { findElementByKey } from "@/lib/element";
+import useActiveTreeNode from "@/hooks/use-active-element";
+import { useElementsTree } from "@/state/element-tree";
 
 function ButtonProperties() {
-  const { props, id } = useActiveElement();
-  const { updateElement, elements } = useElements();
-  const elementIndex = elements.map((e) => e.key).indexOf(id || "");
-  const { updateElement: updateTreeElement } = useTree();
+  const { id, activeIndex, setActiveElement } = useActiveElement();
+  const activeElement = useActiveTreeNode();
+  const { addElement, elements, updateElement } = useElementsTree();
 
   const debouncedUpdateElement = useMemo(
     () => debounce(updateElement, 300),
     []
   );
-  const debouncedUpdateTreeElement = useMemo(
-    () => debounce(updateTreeElement, 300),
-    []
-  );
-  if (elementIndex < 0) return null;
-  const element = elements[elementIndex]!;
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
-    debouncedUpdateElement(
-      elementIndex,
-      {
-        ...props,
-        children: e.target.value,
-      },
-      {
-        label: e.target.value,
-      }
-    );
-    debouncedUpdateTreeElement(id!, "", { label: e.target.value });
+    debouncedUpdateElement(activeIndex!, { children: e.target.value });
   }
 
   return (
@@ -50,22 +36,17 @@ function ButtonProperties() {
         <div className="text-lg">Label</div>
         <Input
           onChange={handleInputChange}
-          defaultValue={element.props.children?.toString()}
+          defaultValue={activeElement?.properties.children?.toString()}
         />
       </div>
       <div>
         <div className="text-lg">Variant</div>
         <Select
-          defaultValue={
-            ((element.props as ButtonProps).variant as string) || "default"
-          }
+          defaultValue={activeElement?.properties?.variant}
           onValueChange={(v) => {
-            debouncedUpdateElement(
-              elementIndex,
-              { variant: v as VariantProps<typeof buttonVariants>["variant"] },
-              { variant: v }
-            );
-            debouncedUpdateTreeElement(id!, "", { variant: v });
+            debouncedUpdateElement(activeIndex!, {
+              variant: v,
+            });
           }}
         >
           <SelectTrigger>

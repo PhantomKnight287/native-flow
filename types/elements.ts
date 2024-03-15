@@ -26,4 +26,5 @@ export interface Element {
    * Special fields, this will be used to render Label for input for example.
    */
   specialFields?: Record<string, any>;
+  children?: Element[];
 }

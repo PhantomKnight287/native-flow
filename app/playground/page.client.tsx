@@ -9,84 +9,118 @@ import { useElements } from "@/state/elements";
 import { useActiveElement } from "@/state/active-element";
 import PhonePreview from "./_components/preview/phone";
 import View from "@/components/polyfills/View";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { debounce } from "lodash";
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useElementsTree } from "@/state/element-tree";
+import { Tree, TreeNode } from "@/structs/tree";
 
 export default function DraggablePlayground() {
-  const { elements } = useElements();
+  const { elements: elementsTree, setElements } = useElementsTree();
+  const { setActiveElement } = useActiveElement();
+  useEffect(() => {
+    if (elementsTree.length) return;
+    const id = crypto.randomUUID();
+    const node = new Tree("View", id, true);
+    setElements([node]);
+    setActiveElement(node, "-1");
+  }, []);
 
   return (
     <div
       className={"w-full h-screen flex flex-col items-center justify-center"}
     >
       <PhonePreview>
-        {elements.map((element) => (
-          <RenderElement key={element.key} element={element} />
+        {elementsTree.map((element) => (
+          <RenderElement key={element.id} element={element} parent />
         ))}
       </PhonePreview>
     </div>
   );
 }
 
-export function RenderElement({ element }: { element: Element }) {
+export function RenderElement({
+  element,
+  index,
+  parent,
+}: { element: TreeNode } & (
+  | { parent?: boolean; index: string }
+  | { parent: boolean; index?: string }
+)) {
   let Child: any = null;
-  switch (element.element) {
-    case ElementTypes.Button:
-      Child = Button;
+  switch (element.name) {
+    case "View":
+      Child = View;
       break;
-    case ElementTypes.Input:
+    case "Input":
       Child = Input;
       break;
-    case ElementTypes.View:
-      Child = View;
+
+    case "Button":
+      Child = Button;
       break;
   }
 
   const { setActiveElement } = useActiveElement();
-  const { elements, updateElement } = useElements();
-  const elementIndex = useMemo(
-    () => elements.map((e) => e.key).indexOf(element.key || ""),
-    [element.key]
-  );
-
-  const debouncedUpdateElement = useMemo(
-    () => debounce(updateElement, 300),
-    []
-  );
-  function updatePosition(e: Element["position"]) {
-    debouncedUpdateElement(elementIndex, undefined, undefined, e);
-  }
-
   return (
-    <Draggable
-      axis="both"
-      defaultPosition={{ x: 0, y: 0 }}
-      scale={1}
-      defaultClassName={
-        "min-w-fit hover:outline hover:outline-1 outline-pink-500"
-      }
-      onMouseDown={() =>
-        setActiveElement(element.element, element.props, element.key)
-      }
-      bounds={"parent"}
-      onDrag={(e, data) => {
-        updatePosition({ x: data.x, y: data.y });
-      }}
-    >
-      <div className="flex-1">
-        {element.element === ElementTypes.Input &&
-        element.specialFields?.label?.value ? (
-          <Label
-            htmlFor={element.specialFields?.label?.htmlFor}
-            className={cn(element.nativeProps?.labelClasses || "")}
-          >
-            {element.specialFields?.label?.value}
-          </Label>
-        ) : null}
-        <Child {...element.props} />
-      </div>
-    </Draggable>
+    <>
+      <Draggable
+        axis="both"
+        defaultPosition={{ x: 0, y: 0 }}
+        scale={1}
+        defaultClassName={cn(
+          "min-w-fit hover:outline hover:outline-1 outline-pink-500",
+          {
+            "h-full": element.name === "View" && parent,
+          }
+        )}
+        onMouseDown={() =>
+          setActiveElement(element, parent ? "-1" : index || "0")
+        }
+        bounds={"parent"}
+      >
+        <div className="flex-1" data-identifier={element.id}>
+          {Child === null ? null : (
+            <>
+              {!element.childrensAllowed ? (
+                <Child
+                  {...element.properties}
+                  className={cn(
+                    {
+                      "h-full flex-1":
+                        parent ||
+                        (element.name === "View" &&
+                          element.children.length === 0),
+                    },
+                    element.properties.className
+                  )}
+                />
+              ) : (
+                <Child
+                  {...element.properties}
+                  className={cn(
+                    {
+                      "h-full flex-1":
+                        parent ||
+                        (element.name === "View" &&
+                          element.children.length === 0),
+                    },
+                    element.properties.className
+                  )}
+                >
+                  {element.children.map((child, _index) => (
+                    <RenderElement
+                      element={child}
+                      key={child.id}
+                      index={parent ? `0.${_index}` : `${index}.${_index}`}
+                    />
+                  ))}
+                </Child>
+              )}
+            </>
+          )}
+        </div>
+      </Draggable>
+    </>
   );
 }

@@ -2,37 +2,37 @@
 
 import { useActiveElement } from "@/state/active-element";
 import { useElements } from "@/state/elements";
-import { ElementTypes } from "@/types/rxjs-event";
 import ButtonProperties from "./button";
 import InputProperties from "./input";
 import { useTree } from "@/state/tree";
 import { Button } from "@/components/ui/button";
+import ViewProperties from "./view";
+import useActiveTreeNode from "@/hooks/use-active-element";
+import { useElementsTree } from "@/state/element-tree";
 
 const Components = {
-  [ElementTypes.Button]: <ButtonProperties />,
-  [ElementTypes.Input]: <InputProperties />,
+  Button: <ButtonProperties />,
+  Input: <InputProperties />,
+  View: <ViewProperties />,
 };
 
 export default function RightSidebar() {
-  const { type, id } = useActiveElement();
-  const { elements, removeElement } = useElements();
-  const { removeElement: removeTreeElement } = useTree();
-  const elementIndex = elements.map((e) => e.key).indexOf(id || "");
-  if (elementIndex < 0) return null;
-  const element = elements[elementIndex]!;
-  if (type === undefined || type === null) return null;
+  const { id, activeIndex } = useActiveElement();
+
+  const { removeElement } = useTree();
+  const { elements } = useElementsTree();
+  const activeElement = useActiveTreeNode();
+  console.log(activeIndex);
+  if (!activeElement) return null;
   return (
     <aside
       className={"bg-gray-700 h-screen p-2 flex flex-col gap-2 z-20"}
       key={id}
     >
-      {/*       
-       //@ts-expect-error */}
-      {Components[element.element]}
+      {Components[activeElement.name as unknown as keyof typeof Components]}
       <Button
         onClick={() => {
-          removeElement(elementIndex);
-          removeTreeElement(id!);
+          removeElement(id!);
         }}
         variant={"destructive"}
       >
