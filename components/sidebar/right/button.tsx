@@ -10,15 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ButtonProps, buttonVariants } from "@/components/ui/button";
-import { VariantProps } from "class-variance-authority";
-import { useTree } from "@/state/tree";
-import { findElementByKey } from "@/lib/element";
 import useActiveTreeNode from "@/hooks/use-active-element";
 import { useElementsTree } from "@/state/element-tree";
 
 function ButtonProperties() {
-  const { id, activeIndex, setActiveElement } = useActiveElement();
+  const { id,  setActiveElement } = useActiveElement();
   const activeElement = useActiveTreeNode();
   const { addElement, elements, updateElement } = useElementsTree();
 
@@ -27,7 +23,7 @@ function ButtonProperties() {
     []
   );
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
-    debouncedUpdateElement(activeIndex!, { children: e.target.value });
+    debouncedUpdateElement(id!, { children: e.target.value });
   }
 
   return (
@@ -44,7 +40,7 @@ function ButtonProperties() {
         <Select
           defaultValue={activeElement?.properties?.variant}
           onValueChange={(v) => {
-            debouncedUpdateElement(activeIndex!, {
+            debouncedUpdateElement(id!, {
               variant: v,
             });
           }}

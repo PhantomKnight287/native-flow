@@ -8,7 +8,7 @@ import { debounce } from "lodash";
 import { useMemo } from "react";
 
 function ViewProperties() {
-  const { id, setActiveElement, activeIndex } = useActiveElement();
+  const { id, setActiveElement } = useActiveElement();
   const activeNode = useActiveTreeNode();
   const { elements, addElement, updateElement } = useElementsTree();
   const updateElementDebounced = useMemo(
@@ -25,12 +25,7 @@ function ViewProperties() {
             const _id = crypto.randomUUID();
             const newNode = new TreeNode("Button", _id, false);
             addElement(id, newNode);
-            setActiveElement(
-              newNode,
-              activeIndex === "-1"
-                ? "0.0"
-                : `${activeIndex}.${activeNode.children.length}`
-            );
+            setActiveElement(newNode);
           }}
         >
           Add Button
@@ -40,7 +35,7 @@ function ViewProperties() {
         <div className="text-lg">ClassNames</div>
         <Input
           onChange={(e) => {
-            updateElementDebounced(activeIndex!, { className: e.target.value });
+            updateElementDebounced(id!, { className: e.target.value });
           }}
           placeholder="Tailwind classes"
           defaultValue={activeNode?.properties.className}

@@ -14,8 +14,8 @@ import { useElementsTree } from "@/state/element-tree";
 import useActiveTreeNode from "@/hooks/use-active-element";
 
 function InputProperties() {
-  const { id, activeIndex } = useActiveElement();
-  const { updateElement, elements } = useElementsTree();
+  const { id } = useActiveElement();
+  const { updateElement } = useElementsTree();
   const debouncedUpdateElement = useMemo(
     () => debounce(updateElement, 300),
     []
@@ -48,7 +48,7 @@ function InputProperties() {
         <div className="text-base">Placeholder</div>
         <Input
           onChange={(e) => {
-            debouncedUpdateElement(activeIndex!, {
+            debouncedUpdateElement(id!, {
               placeholder: e.target.value,
             });
           }}
@@ -70,7 +70,7 @@ function InputProperties() {
         </div>
         <Input
           onChange={(e) => {
-            debouncedUpdateElement(activeIndex!, {
+            debouncedUpdateElement(id!, {
               className: e.target.value,
             });
           }}

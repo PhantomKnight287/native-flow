@@ -9,11 +9,14 @@ import { useActiveElement } from "@/state/active-element";
 import { useElementsTree } from "@/state/element-tree";
 import { TreeNode } from "@/structs/tree";
 import { getElement } from "@/utils/element";
+import { useRouter } from "next/navigation";
 
 export default function LeftSidebar() {
   const { setActiveElement, id } = useActiveElement();
   const { elements, addElement } = useElementsTree();
   const activeNode = useActiveTreeNode();
+  const { push } = useRouter();
+
   return (
     <aside
       className={
@@ -32,7 +35,7 @@ export default function LeftSidebar() {
             indices[indices.length - 1] = String(
               parseInt(indices[indices.length - 1] + 1)
             );
-            setActiveElement(element, indices.join("."));
+            setActiveElement(element);
           }
         }}
       >
@@ -50,7 +53,7 @@ export default function LeftSidebar() {
             indices[indices.length - 1] = String(
               parseInt(indices[indices.length - 1] + 1)
             );
-            setActiveElement(element, indices.join("."));
+            setActiveElement(element);
           }
         }}
       >
@@ -68,7 +71,7 @@ export default function LeftSidebar() {
             indices[indices.length - 1] = String(
               parseInt(indices[indices.length - 1] + 1)
             );
-            setActiveElement(element, indices.join("."));
+            setActiveElement(element);
           }
         }}
       >
@@ -77,7 +80,13 @@ export default function LeftSidebar() {
       <Button
         className="mt-auto"
         onClick={() => {
-          formatCode(generateReactNativeTree(elements)[0]).then(console.log);
+          formatCode(`return (${generateReactNativeTree(elements)[0]})`).then(
+            (v) => {
+              const params = new URLSearchParams();
+              params.set("code", v as string);
+              push(`/output?${params.toString()}`);
+            }
+          );
         }}
       >
         Gimme the Code

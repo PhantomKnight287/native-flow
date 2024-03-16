@@ -4,15 +4,13 @@ import { TreeNode } from "@/structs/tree";
 export interface ActiveElement {
   element?: TreeNode;
   id?: string;
-  activeIndex?: string;
-  setActiveElement: (element: TreeNode, activeIndex: string) => void;
+  setActiveElement: (element: TreeNode) => void;
   clearActiveElement: () => void;
 }
 
 export const useActiveElement = create<ActiveElement>((setter) => ({
   element: undefined,
-  activeIndex: undefined,
-  setActiveElement: (element, activeIndex) =>
-    setter((state) => ({ element, id: element.id, activeIndex })),
+  setActiveElement: (element) =>
+    setter((state) => ({ element, id: element.id })),
   clearActiveElement: () => setter({ id: undefined, element: undefined }),
 }));

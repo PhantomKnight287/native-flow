@@ -17,12 +17,10 @@ const Components = {
 };
 
 export default function RightSidebar() {
-  const { id, activeIndex } = useActiveElement();
+  const { id } = useActiveElement();
 
   const { removeElement } = useTree();
-  const { elements } = useElementsTree();
   const activeElement = useActiveTreeNode();
-  console.log(activeIndex);
   if (!activeElement) return null;
   return (
     <aside

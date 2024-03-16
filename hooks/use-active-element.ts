@@ -4,28 +4,26 @@ import { TreeNode } from "@/structs/tree";
 import { useMemo } from "react";
 
 export default function useActiveTreeNode() {
-  const { activeIndex, id } = useActiveElement();
+  const { id } = useActiveElement();
   const { elements } = useElementsTree();
-  const activeElement = useMemo(() => {
-    if (!activeIndex) return null;
-    if (activeIndex === "-1") return elements[0];
-    else if (activeIndex) {
-      const indices = activeIndex!.split(".");
-      indices.shift();
-      let currentActive: TreeNode | null = null;
-      for (let i = 0; i < indices.length; i++) {
-        if (i == 0) {
-          currentActive = elements[0].children[parseInt(indices[i])];
-        } else {
-          currentActive = !currentActive
-            ? null
-            : currentActive.children[parseInt(indices[i])];
+
+  function findActiveElement(nodes: TreeNode[]): TreeNode | null {
+    for (const node of nodes) {
+      if (node.id === id) {
+        return node;
+      }
+      if (node.children && node.children.length > 0) {
+        const found = findActiveElement(node.children);
+        if (found) {
+          return found;
         }
       }
-      return currentActive;
-    } else {
-      return null;
     }
-  }, [id, activeIndex]);
+    return null;
+  }
+  const activeElement = useMemo(() => {
+    return findActiveElement(elements);
+  }, [id]);
+
   return activeElement;
 }
